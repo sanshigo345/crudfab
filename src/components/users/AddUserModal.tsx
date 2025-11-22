@@ -10,17 +10,16 @@ import {
   Select,
   MenuItem,
   Box,
-  Alert,
   CircularProgress,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSnackbar } from 'notistack';
 import { createUser } from '../../services/userService';
 import { JOB_GROUPS } from '../../services/mockData';
 
-// 1. Validation Schema
 const userSchema = z.object({
   firstName: z.string().min(2, 'First name is too short'),
   lastName: z.string().min(2, 'Last name is too short'),
@@ -38,6 +37,7 @@ interface AddUserModalProps {
 
 const AddUserModal = ({ open, onClose }: AddUserModalProps) => {
   const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
 
   const {
     control,
@@ -46,6 +46,7 @@ const AddUserModal = ({ open, onClose }: AddUserModalProps) => {
     formState: { errors },
   } = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
+    mode: 'onBlur',
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -55,14 +56,18 @@ const AddUserModal = ({ open, onClose }: AddUserModalProps) => {
     },
   });
 
-  // 2. Mutation for creating user
   const mutation = useMutation({
     mutationFn: createUser,
     onSuccess: () => {
-      // Invalidate 'users' query so the table refreshes automatically
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      
+      enqueueSnackbar('User created successfully!', { variant: 'success' });
+
       handleClose();
-      // Ideally show a success toast here
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      enqueueSnackbar(message, { variant: 'error' });
     },
   });
 
@@ -82,12 +87,6 @@ const AddUserModal = ({ open, onClose }: AddUserModalProps) => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {mutation.isError && (
-              <Alert severity="error">
-                {mutation.error instanceof Error ? mutation.error.message : 'An error occurred'}
-              </Alert>
-            )}
-
             <Box sx={{ display: 'flex', gap: 2 }}>
               <Controller
                 name="firstName"
@@ -159,11 +158,6 @@ const AddUserModal = ({ open, onClose }: AddUserModalProps) => {
                       </MenuItem>
                     ))}
                   </Select>
-                  {errors.jobGroup && (
-                    <Alert severity="error" sx={{ mt: 1, p: 0, border: 'none', bgcolor: 'transparent' }}>
-                      {errors.jobGroup.message}
-                    </Alert>
-                  )}
                 </FormControl>
               )}
             />

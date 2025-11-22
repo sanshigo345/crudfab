@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Container, Box, Typography, Button, AppBar, Toolbar } from '@mui/material';
+import { Container, Box, Typography, Button, AppBar, Toolbar, Chip } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AddIcon from '@mui/icons-material/Add';
 import { useAuthStore } from '../store/authStore';
@@ -23,8 +23,13 @@ const Dashboard = () => {
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Typography variant="body2">
-              {user?.fullName} ({user?.role})
+              {user?.fullName}
             </Typography>
+            <Chip 
+              label={user?.role} 
+              color={user?.role === 'admin' ? 'error' : 'primary'} 
+              size="small" 
+            />
             <Button color="inherit" startIcon={<LogoutIcon />} onClick={logout}>
               Logout
             </Button>
@@ -37,13 +42,16 @@ const Dashboard = () => {
           <Typography variant="h4" component="h1">
             User Management
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setIsModalOpen(true)}
-          >
-            Add New User
-          </Button>
+
+          {user?.role === 'admin' && (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setIsModalOpen(true)}
+            >
+              Add New User
+            </Button>
+          )}
         </Box>
 
         <UserFilterBar />

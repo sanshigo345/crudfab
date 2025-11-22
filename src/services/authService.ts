@@ -8,7 +8,7 @@ interface LoginResponse {
 export const loginMockService = async (email: string, password: string): Promise<LoginResponse> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (password === 'password123') {
+      if (password === 'bugra123') {
         resolve({
           token: 'fake-jwt-token-xyz-123',
           user: {

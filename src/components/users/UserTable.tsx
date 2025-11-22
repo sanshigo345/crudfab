@@ -21,12 +21,10 @@ import type { User } from '../../types/user';
 const UserTable = () => {
   const store = useUserTableStore();
 
-  // Fetch data using TanStack Query
-  // This automatically handles caching and refetching when 'store' changes
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['users', store.page, store.pageSize, store.search, store.tcknPrefix, store.jobGroup, store.sortBy, store.sortDirection],
     queryFn: () => fetchUsers(store),
-    placeholderData: (previousData) => previousData, // Keeps previous data visible while loading new data
+    placeholderData: (previousData) => previousData,
   });
 
   const handleSort = (property: keyof User) => {
@@ -67,8 +65,24 @@ const UserTable = () => {
                       Last Name
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>TCKN</TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={store.sortBy === 'email'}
+                      direction={store.sortBy === 'email' ? store.sortDirection : 'asc'}
+                      onClick={() => handleSort('email')}
+                    >
+                      Email
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={store.sortBy === 'tckn'}
+                      direction={store.sortBy === 'tckn' ? store.sortDirection : 'asc'}
+                      onClick={() => handleSort('tckn')}
+                    >
+                      TCKN
+                    </TableSortLabel>
+                  </TableCell>
                   <TableCell>
                     <TableSortLabel
                         active={store.sortBy === 'jobGroup'}
@@ -116,7 +130,7 @@ const UserTable = () => {
           <TablePagination
             component="div"
             count={data?.totalCount || 0}
-            page={store.page - 1} // Material UI is 0-indexed, our API is 1-indexed
+            page={store.page - 1}
             onPageChange={(_, newPage) => store.setPage(newPage + 1)}
             rowsPerPage={store.pageSize}
             onRowsPerPageChange={(e) => store.setPageSize(parseInt(e.target.value, 10))}

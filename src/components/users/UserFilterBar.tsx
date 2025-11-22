@@ -8,6 +8,8 @@ import {
   MenuItem,
   Button,
   Paper,
+  Chip,
+  OutlinedInput
 } from '@mui/material';
 import { useUserTableStore } from '../../store/userTableStore';
 import { JOB_GROUPS } from '../../services/mockData';
@@ -66,16 +68,24 @@ const UserFilterBar = () => {
           sx={{ minWidth: 150 }}
         />
 
-        <FormControl size="small" sx={{ minWidth: 180 }}>
+        <FormControl size="small" sx={{ minWidth: 200, maxWidth: 400 }}>
           <InputLabel>Job Group</InputLabel>
           <Select
-            value={jobGroup || ''}
-            label="Job Group"
-            onChange={(e) => setJobGroup(e.target.value)}
+            multiple
+            value={jobGroup || []}
+            onChange={(e) => {
+              const { value } = e.target;
+              setJobGroup(typeof value === 'string' ? value.split(',') : value);
+            }}
+            input={<OutlinedInput label="Job Group" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {selected.map((value) => (
+                  <Chip key={value} label={value} size="small" />
+                ))}
+              </Box>
+            )}
           >
-            <MenuItem value="">
-              <em>All</em>
-            </MenuItem>
             {JOB_GROUPS.map((group) => (
               <MenuItem key={group} value={group}>
                 {group}

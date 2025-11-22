@@ -1,10 +1,8 @@
 import type { User, PaginatedResponse, UserFilterParams } from '../types/user';
 import { MOCK_USERS } from './mockData';
 
-// Simulate backend delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// We keep a local reference to mutate the data for this session
 const inMemoryUsers = [...MOCK_USERS];
 
 export const fetchUsers = async (params: UserFilterParams): Promise<PaginatedResponse<User>> => {
@@ -12,7 +10,6 @@ export const fetchUsers = async (params: UserFilterParams): Promise<PaginatedRes
 
   let filteredData = [...inMemoryUsers];
 
-  // 1. Filter by Search
   if (params.search) {
     const lowerSearch = params.search.toLowerCase();
     filteredData = filteredData.filter(
@@ -22,17 +19,14 @@ export const fetchUsers = async (params: UserFilterParams): Promise<PaginatedRes
     );
   }
 
-  // 2. Filter by TCKN Prefix
   if (params.tcknPrefix) {
     filteredData = filteredData.filter((user) => user.tckn.startsWith(params.tcknPrefix!));
   }
 
-  // 3. Filter by Job Group
-  if (params.jobGroup) {
-    filteredData = filteredData.filter((user) => user.jobGroup === params.jobGroup);
+  if (params.jobGroup && params.jobGroup.length > 0) {
+    filteredData = filteredData.filter((user) => params.jobGroup!.includes(user.jobGroup));
   }
 
-  // 4. Sorting
   if (params.sortBy) {
     filteredData.sort((a, b) => {
       const aValue = a[params.sortBy!];
@@ -44,7 +38,6 @@ export const fetchUsers = async (params: UserFilterParams): Promise<PaginatedRes
     });
   }
 
-  // 5. Pagination
   const totalCount = filteredData.length;
   const startIndex = (params.page - 1) * params.pageSize;
   const endIndex = startIndex + params.pageSize;
@@ -58,14 +51,16 @@ export const fetchUsers = async (params: UserFilterParams): Promise<PaginatedRes
   };
 };
 
-// New function to create a user
 export const createUser = async (userData: Omit<User, 'id' | 'createdAt'>): Promise<User> => {
-  await delay(800); // Simulate network request
+  await delay(800);
 
-  // Simulate server-side validation
   const exists = inMemoryUsers.some(u => u.email === userData.email || u.tckn === userData.tckn);
   if (exists) {
-    throw new Error('User with this Email or TCKN already exists.');
+    throw new Error('409: User with this Email or TCKN already exists.');
+  }
+
+  if (userData.firstName.toLowerCase() === 'error') {
+    throw new Error('400: Invalid name parameter detected.');
   }
 
   const newUser: User = {
@@ -74,7 +69,6 @@ export const createUser = async (userData: Omit<User, 'id' | 'createdAt'>): Prom
     createdAt: new Date().toISOString(),
   };
 
-  // Add to beginning of list so it's visible
   inMemoryUsers.unshift(newUser);
   
   return newUser;
