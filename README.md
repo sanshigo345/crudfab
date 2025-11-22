@@ -79,8 +79,8 @@ You can use the following credentials to test the different roles:
 
 | Role | Email | Password | Capabilities |
 |------|-------|----------|--------------|
-| **Admin** | `admin@test.com` | `password123` | View, Filter, **Add Users** |
-| **User** | `user@test.com` | `password123` | View, Filter |
+| **Admin** | `admin@test.com` | `bugra123` | View, Filter, **Add Users** |
+| **User** | `user@test.com` | `bugra123` | View, Filter |
 
 ## 📂 Project Structure
 
